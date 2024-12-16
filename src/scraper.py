@@ -1,4 +1,5 @@
 import time
+import random
 
 # Automatiza instalación de chorme driver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -10,74 +11,64 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 # Definir tipo de busqueda
 from selenium.webdriver.common.by import By
+# Manejar opciones de Select
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.common.exceptions import TimeoutException
+
+from funtions.utils import start_chrome
+from funtions.config import URL, ID_FORM_PUBLICA, ID_JURIDICCION, select_jurid, tex_parte, ID_PARTE, ID_BUSCAR
 
 # https://www.google.com/search?q=youtube%3A+proyecto+completo+de+web+scraping+con+selenium&oq=youtube%3A+proyecto+completo+de+web+scraping+con+selenium&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQRRg60gEJMTc2NjNqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8
 
-def start_chrome():
-    """
-        Start chrome with the established configuration and return the driver.
-    """
 
-    # instalación de chromedriver correspondiente
-    ruta = ChromeDriverManager().install()
-
-    #Opciones de chrome
-    options = Options()
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-    options.add_argument(f'user-agent={user_agent}')
-    options.add_argument('--headless')
-    options.add_argument('--disable-web-security')
-    options.add_argument('--disable-extensions')
-    options.add_argument('--disable-notifications')
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--log-level=3')
-    options.add_argument('--allow-running-insecure-content')
-    options.add_argument('--no-default-browser-check')
-    options.add_argument('--no-first-run')
-    options.add_argument('--no-proxy-server')
-    options.add_argument('--disable-blink-features=AutomationControlled')
-
-    #Parametros a Omitir
-    exp_opt = [
-        'enable-automation',
-        'ignore-certificate-errors',
-        'enable-logging'
-    ]
-    options.add_experimental_option('excludeSwitches', exp_opt)
-
-    #Preferencias en Chromedriver
-    prefs = {
-        'profile.default_content_setting_values.notifications' : 2,
-        'intl.accept_languages' : ['es-ES', 'es'],
-        'credentials_enable_service' : False
-    }
-    options.add_experimental_option('prefs', prefs)
-
-    #Instanciar servicio de chrome
-    ser = Service(ruta)
-    driver = webdriver.Chrome(service=ser, options=options)
-
-    return driver
 
 
 # MAIN
 if __name__ == '__main__':
     driver = start_chrome()
-    url = 'https://articulo.mercadolibre.com.ve/MLV-767782546-oferta-combo-tarjeta-madre-h81-core-i7-fan-cooler-8gb-_JM#polycard_client=search-nordic&position=2&search_layout=grid&type=item&tracking_id=8d625a57-b631-43a3-8e25-1faf719bee02'
+    wait = WebDriverWait(driver, 20)
+    url = URL
     driver.get(url)
-    input('ingrese el catcha y pulse enter.....')
-    # Inicio Scraper
-    nombre_producto = driver.find_element(By.CSS_SELECTOR, 'h1.ui-pdp-title').text
-    precio_producto = driver.find_element(By.CSS_SELECTOR, 'span.ui-pdp-price__part').text
 
-    # print(f'Nombre Producto: {nombre_producto}')
-    # print(f'Precio Producto: {precio_producto}')
+    # Ingresar a pagina de Consulta pública por Parte
+    driver.find_element(By.ID, ID_FORM_PUBLICA).click()
+
+    # Rellenar información de busqueda
+    wait.until(ec.visibility_of_element_located((By.ID, ID_JURIDICCION)))
+
+    # Jurisdiccion
+    jurisdiccion = Select(driver.find_element(By.ID, ID_JURIDICCION))
+    jurisdiccion.select_by_value(select_jurid)
+    # Parte
+    parte = driver.find_element(By.ID, ID_PARTE)
+    parte.send_keys(tex_parte)
+    # Boton
+    button = driver.find_element(By.ID, ID_BUSCAR)
+
+
+    time.sleep(random.random())
+    # Seleccionar reCAPCHA
+    driver.switch_to.frame(0)
+    driver.find_element(By.XPATH, '//*[@id="recaptcha-anchor"]/div[1]').click()
+
+    time.sleep(20)
+    captcha = driver.find_element(By.XPATH, '//*[@id="recaptcha-anchor"]')
+    value = captcha.get_attribute("aria-checked")
+    if value == 'true':
+        value = True
+
+    print(value, type(value))
+
+    if value == True:
+        driver.switch_to.default_content()
+        button.click()
+
+    input('espera y pulsa enter.....')
+
     
-    driver.quit()
 
-    lista = precio_producto.split()
-    print(lista)
+    driver.quit()
 
 
 
