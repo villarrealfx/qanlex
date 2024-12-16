@@ -63,3 +63,18 @@ def start_chrome():
     driver = webdriver.Chrome(service=ser, options=options)
 
     return driver
+
+
+def recapcha(driver):
+    
+    captcha = driver.find_element(By.XPATH, '//*[@id="recaptcha-anchor"]')
+    value = captcha.get_attribute("aria-checked")
+    print(f'valor de atributo "aria-checked" Inicial: {value}')
+
+    while value == 'false':
+        time.sleep(0.5)
+        captcha = driver.find_element(By.XPATH, '//*[@id="recaptcha-anchor"]')
+        value = captcha.get_attribute("aria-checked")
+        print(f'valor de atributo "aria-checked" Inicial: {value}')
+
+    return True
