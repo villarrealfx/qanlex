@@ -66,15 +66,77 @@ def start_chrome():
 
 
 def recapcha(driver):
+
+    """
+        Documentar
+    """
     
     captcha = driver.find_element(By.XPATH, '//*[@id="recaptcha-anchor"]')
     value = captcha.get_attribute("aria-checked")
-    print(f'valor de atributo "aria-checked" Inicial: {value}')
+    # print(f'valor de atributo "aria-checked" Inicial: {value}')
 
     while value == 'false':
         time.sleep(0.5)
         captcha = driver.find_element(By.XPATH, '//*[@id="recaptcha-anchor"]')
         value = captcha.get_attribute("aria-checked")
-        print(f'valor de atributo "aria-checked" Inicial: {value}')
+        # print(f'valor de atributo "aria-checked" Inicial: {value}')
 
     return True
+
+def get_information(driver):
+    """
+        Documentar
+    """
+    
+    expediente = {
+        # Extracción de Información Relevante
+        'expediente_numero' : driver.find_element(By.XPATH, '//*[@id="expediente:j_idt90:j_idt91"]/div/div[1]/div/div/div[2]/span').text,
+        'jurisdicción' : driver.find_element(By.ID, 'expediente:j_idt90:detailCamera').text,
+        'dependencia' : driver.find_element(By.ID, 'expediente:j_idt90:detailDependencia').text,
+        'caratula' : driver.find_element(By.ID, 'expediente:j_idt90:detailCover').text,
+        'actuaciones' : get_table_actuaciones(driver)
+
+
+    }
+
+    return expediente
+
+def get_table_actuaciones(driver):
+
+    pag = 1
+    actuaciones = []
+    while pag != 'Ver históricas':
+
+        # Identificar Filas de tabla
+        rows = driver.find_elements(By.XPATH, '//*[@id="expediente:action-table"]/tbody/tr')
+        columns = driver.find_elements(By.XPATH, '//*[@id="expediente:action-table"]/tbody/tr[1]/td')
+
+        print(f'{len(rows)} | {len(columns)}')
+
+        if len(rows) > 0:
+        
+            for i in range(1, len(rows)+1):
+                            
+                actuaciones_fila = {
+                'oficina' : driver.find_element(By.XPATH, f'//*[@id="expediente:action-table:{i-1}:officeColumn"]').text,
+                'fecha' : driver.find_element(By.XPATH, f'//*[@id="expediente:action-table"]/tbody/tr[{i}]/td[3]/span[2]').text,
+                'tipo' : driver.find_element(By.XPATH, f'//*[@id="expediente:action-table"]/tbody/tr[{i}]/td[4]/span[2]').text,
+                'descripcion' : driver.find_element(By.XPATH, f'//*[@id="expediente:action-table"]/tbody/tr[{i}]/td[5]/span[2]').text
+                }
+                actuaciones.append(actuaciones_fila)
+
+            pag = driver.find_element(By.XPATH, '//*[@id="expediente:j_idt208:divPagesAct"]/ul/li[contains(@class,"active")]/span/following::a[1]/span').text
+
+            print(f'pagina: {pag}')
+
+            if pag != 'Ver históricas':
+                driver.find_element(By.XPATH, '//*[@id="expediente:j_idt208:divPagesAct"]/ul/li[contains(@class,"active")]/span/following::a[1]').click()
+
+        else:
+            break
+    
+    return actuaciones        
+
+        
+    
+# //*[@id="expediente:j_idt208:divPagesAct"]/ul/li[contains(@class,"active")]/span/following::a[1]

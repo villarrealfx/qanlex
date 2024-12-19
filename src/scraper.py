@@ -16,17 +16,16 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException
 
-from funtions.utils import start_chrome, recapcha
+from funtions.utils import start_chrome, recapcha, get_information
 from funtions.config import URL, ID_FORM_PUBLICA, ID_JURIDICCION, select_jurid, tex_parte, ID_PARTE, ID_BUSCAR
-
-# https://www.google.com/search?q=youtube%3A+proyecto+completo+de+web+scraping+con+selenium&oq=youtube%3A+proyecto+completo+de+web+scraping+con+selenium&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQRRg60gEJMTc2NjNqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8
-
-
 
 
 # MAIN
 if __name__ == '__main__':
-    print('INICIO DE SCRAPING'.center(80, '#'))
+    
+    inicio = time.time()
+
+    print('  INICIO DE SCRAPING  '.center(80, '#'))
     print('#'*80)
     driver = start_chrome()
     wait = WebDriverWait(driver, 50)
@@ -49,7 +48,7 @@ if __name__ == '__main__':
     button = driver.find_element(By.ID, ID_BUSCAR)
 
     # random.random()
-    time.sleep(random.uniform(0.75,3))
+    time.sleep(random.uniform(1.3,4))
     
     print('Solucionando reCAPCHA ......')
     # Seleccionar reCAPCHA
@@ -61,13 +60,56 @@ if __name__ == '__main__':
     #     value = recapcha(driver)
 
     print('reCAPCHA Resuelto ......')
-    print(value, type(value))
-
-
+    
     driver.switch_to.default_content()
     button.click()
     print('Entrando a pagina de consulta ......')
 
+    # Trabajar con Tabla
+    # Identificar Filas de tabla
+    rows = driver.find_elements(By.XPATH, '//*[@id="j_idt118:j_idt119:dataTable"]/tbody/tr')
+    columns = driver.find_elements(By.XPATH, '//*[@id="j_idt118:j_idt119:dataTable"]/tbody/tr[1]/td')
+
+    print(f"Filas {len(rows)} y columnas {len(columns)}")
+
+    expedientes = []
+
+    btt_pag = 'Siguiente'
+
+    while btt_pag == 'Siguiente':
+
+        for i in range(1, 3): #len(rows)+1):
+
+            # time.sleep(10)
+            wait.until(ec.element_to_be_clickable((By.XPATH, f'//*[@id="j_idt118:j_idt119:dataTable"]/tbody/tr[{i}]/td[6]/div/a')))
+            time.sleep(5)
+            
+            driver.find_element(By.XPATH, f'//*[@id="j_idt118:j_idt119:dataTable"]/tbody/tr[{i}]/td/div').click()
+
+
+            # Extraer información
+            expediente = get_information(driver)
+            expedientes.append(expediente)
+
+
+            print(f'  Expediente # {expediente["expediente_numero"]} extraído '.center(80, '-'))
+            
+            driver.back()
+
+        wait.until(ec.visibility_of_element_located((By.CSS_SELECTOR, 'ul.pagination')))
+        btt_pag = driver.find_element(By.CSS_SELECTOR, 'ul.pagination').text
+
+        print(btt_pag)
+        
+        if btt_pag == 'Siguiente':
+            driver.find_element(By.CSS_SELECTOR, 'ul.pagination').click()
+            
+
+
+    print(expedientes)
+
+    final =time.time()
+    print(f'Tiempo de duración de procesamiento: {final - inicio} segundos')
     input('espera y pulsa enter.....')
 
     driver.quit()
