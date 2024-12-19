@@ -93,9 +93,10 @@ def get_information(driver):
         'expediente_numero' : driver.find_element(By.XPATH, '//*[@id="expediente:j_idt90:j_idt91"]/div/div[1]/div/div/div[2]/span').text,
         'jurisdicción' : driver.find_element(By.ID, 'expediente:j_idt90:detailCamera').text,
         'dependencia' : driver.find_element(By.ID, 'expediente:j_idt90:detailDependencia').text,
+        'situacion_ actual': driver.find_element(By.ID, 'expediente:j_idt90:detailSituation').text,
         'caratula' : driver.find_element(By.ID, 'expediente:j_idt90:detailCover').text,
-        'actuaciones' : get_table_actuaciones(driver)
-
+        'actuaciones' : get_table_actuaciones(driver),
+        'intervinientes' : get_intervinientes(driver)
 
     }
 
@@ -135,8 +136,33 @@ def get_table_actuaciones(driver):
         else:
             break
     
-    return actuaciones        
+    return actuaciones
 
-        
+def get_intervinientes(driver):
+
+    # expediente:j_idt261:header:active
+
+    # Ingresar a pagina de Consulta pública por Parte
+    driver.find_element(By.ID, 'expediente:j_idt261:header:inactive').click()
+
+    time.sleep(3)
     
-# //*[@id="expediente:j_idt208:divPagesAct"]/ul/li[contains(@class,"active")]/span/following::a[1]
+    # Obtener Partes
+    rows_parte = driver.find_elements(By.XPATH, '//*[@id="expediente:participantsTable"]/tbody[contains(@class,"rf-dt-b")]')
+    
+    intervinientes = []
+    if len(rows_parte) > 0:
+
+        for i in range(len(rows_parte)):
+            
+            print(f'fila partes N° {i}')
+
+            parte_fila = {
+            'tipo' :driver.find_element(By.XPATH, f'//*[@id="expediente:participantsTable"]/tbody[contains(@id,"expediente:participantsTable:{i}:tb")]/tr/td[1]/span[2]').text,
+
+            'nombre' : driver.find_element(By.XPATH, f'//*[@id="expediente:participantsTable"]/tbody[contains(@id,"expediente:participantsTable:{i}:tb")]/tr/td[2]/span[2]').text
+            }
+
+            intervinientes.append(parte_fila)
+
+    return intervinientes    
