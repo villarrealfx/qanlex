@@ -6,9 +6,8 @@ from selenium.webdriver.common.by import By
 # Manejar opciones de Select
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.common.exceptions import TimeoutException
 
-from funtions.utils import start_chrome, recapcha, get_information
+from funtions.utils import start_chrome, recapcha, get_information, clear
 from funtions.config import URL, ID_FORM_PUBLICA, ID_JURIDICCION, select_jurid, tex_parte, ID_PARTE, ID_BUSCAR, XP_RECAPCHA, XP_DATATABLE, XP_DATATABLE_COLUM
 
 
@@ -17,7 +16,7 @@ if __name__ == '__main__':
     try:
     
         inicio = time.time()
-
+        clear()
         print('  INICIO DE SCRAPING  '.center(80, '#'))
         print('-'*80)
 
@@ -56,6 +55,9 @@ if __name__ == '__main__':
         driver.find_element(By.XPATH, XP_RECAPCHA).click()
 
         value = recapcha(driver)
+        # if value == False:
+
+            
 
         print('reCAPCHA Resuelto ......')
 
@@ -80,9 +82,8 @@ if __name__ == '__main__':
 
         while btt_pag == 'Siguiente':
 
-            for i in range(1, 3): #len(rows)+1):
+            for i in range(1, len(rows)+1):
 
-                # time.sleep(10)
                 wait.until(ec.element_to_be_clickable((By.XPATH, f'//*[@id="j_idt118:j_idt119:dataTable"]/tbody/tr[{i}]/td[6]/div/a')))
                 time.sleep(5)
                 
