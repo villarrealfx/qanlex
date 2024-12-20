@@ -7,8 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
-from funtions.utils import start_chrome, recapcha, get_information, clear
-from funtions.config import URL, ID_FORM_PUBLICA, ID_JURIDICCION, select_jurid, tex_parte, ID_PARTE, ID_BUSCAR, XP_RECAPCHA, XP_DATATABLE, XP_DATATABLE_COLUM
+from funtions.utils import start_chrome, recapcha, get_information, clear, list_to_table
+from funtions.config import URL, ID_FORM_PUBLICA, ID_JURIDICCION,  ID_PARTE, ID_BUSCAR, XP_RECAPCHA, XP_DATATABLE, XP_DATATABLE_COLUM, select_jurid, tex_parte, jurisdi
 
 
 # MAIN
@@ -17,10 +17,10 @@ if __name__ == '__main__':
     
         inicio = time.time()
         clear()
-        print('  INICIO DE SCRAPING  '.center(80, '#'))
+        print('  INICIO DE SCRAPING  '.center(80, '-'))
         print('-'*80)
 
-        driver = start_chrome()
+        driver = start_chrome()  # Se crea instancia de webdriver.Chrome con options predefinidas
         wait = WebDriverWait(driver, 50)
 
         driver.get(URL)
@@ -57,11 +57,8 @@ if __name__ == '__main__':
         value = recapcha(driver)
         # if value == False:
 
-            
-
         print('reCAPCHA Resuelto ......')
 
-            
         driver.switch_to.default_content()
         button.click()
 
@@ -71,10 +68,11 @@ if __name__ == '__main__':
 
         # Trabajar con Tabla
         # Identificar Filas de tabla
+        time.sleep(3)
         rows = driver.find_elements(By.XPATH, XP_DATATABLE)
         columns = driver.find_elements(By.XPATH, XP_DATATABLE_COLUM)
 
-        print(f"Filas {len(rows)} y columnas {len(columns)}")
+        # print(f"Filas {len(rows)} y columnas {len(columns)}")
 
         expedientes = []
 
@@ -85,7 +83,7 @@ if __name__ == '__main__':
             for i in range(1, len(rows)+1):
 
                 wait.until(ec.element_to_be_clickable((By.XPATH, f'//*[@id="j_idt118:j_idt119:dataTable"]/tbody/tr[{i}]/td[6]/div/a')))
-                time.sleep(5)
+                time.sleep(3)
                 
                 driver.find_element(By.XPATH, f'//*[@id="j_idt118:j_idt119:dataTable"]/tbody/tr[{i}]/td/div').click()
 
@@ -106,10 +104,9 @@ if __name__ == '__main__':
             
             if btt_pag == 'Siguiente':
                 driver.find_element(By.CSS_SELECTOR, 'ul.pagination').click()
+                time.sleep(3)
                 
-
-
-        print(expedientes)
+        file = list_to_table(expedientes)
 
         final =time.time()
         print()
@@ -123,6 +120,15 @@ if __name__ == '__main__':
         print('-'*80)
         print(f'Tiempo Total de procesamiento: {final - inicio} segundos')
         print('-'*80)
+        print('Información General de los datos recabados:')
+        print('-'*80)
+        print(f'Cantidad de registros ..................................... {len(expedientes)}')
+        print(f'Jurisdición analisada ..................................... {jurisdi}')
+        print(f'Parte analisada ........................................... {tex_parte}')
+        print('-'*80)
+
+
+
 
     except Exception as e: 
         # Manejar otros errores de análisis 
@@ -130,8 +136,6 @@ if __name__ == '__main__':
         
     finally : 
         # Cerrar la instancia de webdriver
-
-        input('espera y pulsa enter.....')
         driver.quit()
 
 

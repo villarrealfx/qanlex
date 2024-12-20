@@ -5,6 +5,7 @@ URL = 'https://scw.pjn.gov.ar/scw/home.seam'
 
 # Variables 
 select_jurid = '10'
+jurisdi = 'COM - Camara Nacional de Apelaciones en lo comercial' 
 tex_parte = 'RESIDUOS'
 
 
