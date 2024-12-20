@@ -1,4 +1,5 @@
 import time
+import datetime
 import os
 
 import pandas as pd
@@ -98,27 +99,21 @@ def recapcha(driver):
     Para una solución más robusta, se podría implementar un mecanismo de resolución automática utilizando servicios especializados.
     """
     
-    try:
+    captcha = driver.find_element(By.XPATH, XP_RECAPCHA_)
+    value = captcha.get_attribute("aria-checked")
+    n = 0
+    while value == 'false':
+        time.sleep(0.5)
         captcha = driver.find_element(By.XPATH, XP_RECAPCHA_)
         value = captcha.get_attribute("aria-checked")
+        n += 1
+
+        if n == 60:
+            return False
         
-        while value == 'false':
-            time.sleep(0.5)
-            captcha = driver.find_element(By.XPATH, XP_RECAPCHA_)
-            value = captcha.get_attribute("aria-checked")
+    return True
 
-        return True
-
-    except NoSuchElementException:
-        print("No se encontró el elemento del reCAPTCHA.")
-    except TimeoutException:
-        print("Se excedió el tiempo de espera.")
-    except:
-        print("Ha ocurrido un error.")
-
-    return False
-
-
+    
 def get_information(driver):
     """
     Extrae información relevante de un expediente desde el navegador web controlado por el driver.
@@ -180,8 +175,6 @@ def get_table_actuaciones(driver):
         rows = driver.find_elements(By.XPATH, XP_ACTUACIONES_FILAS)
         columns = driver.find_elements(By.XPATH, XP_ACTUACIONES_COLUM)
 
-        print(f'función actuaciones: {len(rows)} | {len(columns)}')
-
         if len(rows) > 0:  # Si hay filas en la tabla
         
             for i in range(1, len(rows)+1):
@@ -229,7 +222,7 @@ def get_intervinientes(driver):
     # Ingresar a pagina de Consulta pública por Parte
     driver.find_element(By.ID, ID_INTERVINIENTES).click()
 
-    time.sleep(3)
+    time.sleep(5)
 
     # Obtener Partes
     rows_parte = driver.find_elements(By.XPATH, XP_PARTICIPANTES)
@@ -238,9 +231,7 @@ def get_intervinientes(driver):
     if len(rows_parte) > 0:
 
         for i in range(len(rows_parte)):
-            
-            print(f'fila partes N° {i}')
-
+ 
             parte_fila = {
             'tipo' :driver.find_element(By.XPATH, f'//*[@id="expediente:participantsTable"]/tbody[contains(@id,"expediente:participantsTable:{i}:tb")]/tr/td[1]/span[2]').text,
 
@@ -272,11 +263,19 @@ def list_to_table(list):
     Esta función utiliza toda la información recabada en el proceso de scarping y crea un archivo .csv para la realización de análisis posteriormente.
     """
     try:
+        date = str(datetime.datetime.now().strftime("%Y-%m-%d %H-%M"))
         df = pd.DataFrame(list) 
-        df.to_csv('/data/raw/expedientes_qanlex.csv', sep=',', index=False, encoding='utf-8')
+        df.to_csv(f'data/raw/expedientes_qanlex_{date}.csv', sep=',', index=False, encoding='utf-8')
         print('Archivo "expedientes_qanlex.csv" generado correctamente')
         print('ubicado en: scraper/data/raw')
         return True
+    
+    except OSError as e:
+        print ( f'Error ocurrido al crear archivo csv: {e} ' )
+        df.to_csv('expedientes_qanlex.csv', sep=',', index=False, encoding='utf-8')
+        return True
+    
     except Exception as e:
         print ( f'Error ocurrido al crear archivo csv: {e} ' )
-        return False
+               
+    return False

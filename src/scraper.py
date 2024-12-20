@@ -11,8 +11,7 @@ from funtions.utils import start_chrome, recapcha, get_information, clear, list_
 from funtions.config import URL, ID_FORM_PUBLICA, ID_JURIDICCION,  ID_PARTE, ID_BUSCAR, XP_RECAPCHA, XP_DATATABLE, XP_DATATABLE_COLUM, select_jurid, tex_parte, jurisdi
 
 
-# MAIN
-if __name__ == '__main__':
+def scraping():
     try:
     
         inicio = time.time()
@@ -44,7 +43,6 @@ if __name__ == '__main__':
         # Boton
         button = driver.find_element(By.ID, ID_BUSCAR)
 
-        # random.random()
         time.sleep(random.uniform(1.3,4))
         
         rellenar_información = time.time()
@@ -54,8 +52,8 @@ if __name__ == '__main__':
         driver.switch_to.frame(0)
         driver.find_element(By.XPATH, XP_RECAPCHA).click()
 
-        value = recapcha(driver)
-        # if value == False:
+        if not recapcha(driver):
+            raise ValueError("Tiempo de resolución de reCAPCHA exedido")
 
         print('reCAPCHA Resuelto ......')
 
@@ -71,8 +69,6 @@ if __name__ == '__main__':
         time.sleep(3)
         rows = driver.find_elements(By.XPATH, XP_DATATABLE)
         columns = driver.find_elements(By.XPATH, XP_DATATABLE_COLUM)
-
-        # print(f"Filas {len(rows)} y columnas {len(columns)}")
 
         expedientes = []
 
@@ -128,15 +124,23 @@ if __name__ == '__main__':
         print('-'*80)
 
 
-
-
+    except ValueError as e: 
+        # Manejar otros errores de análisis 
+        print ( f'Error ocurrido : {e} ' ) 
+        driver.quit()
     except Exception as e: 
         # Manejar otros errores de análisis 
         print ( f'Error ocurrido al analizar HTML: {e} ' ) 
-        
+        driver.quit()
     finally : 
         # Cerrar la instancia de webdriver
         driver.quit()
+
+
+# MAIN
+if __name__ == '__main__':
+    scraping()
+    
 
 
     
