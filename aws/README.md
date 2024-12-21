@@ -40,6 +40,17 @@
 
     Después de enviar la imagen a AWS ECR, puede implementarla mediante AWS Lambda.
 
+    * Imagenes
+
+![Script corriendo en aws: err ](img/scraper_03.png)
+**Error corriendo script en AWS**
+
+![contenedor docker ](img/container_aws.png)
+**Contenedor docker en AWS**
+
+![función lambda ](img/lambda.png)
+**Función lambda en AWS**
+
     
 
 
