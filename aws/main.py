@@ -298,7 +298,7 @@ def list_to_table(list):
                
     return False
 
-def lambda_scraping():
+def lambda_scraping(event, context):
     try:
     
         inicio = time.time()
