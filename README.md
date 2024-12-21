@@ -1,7 +1,8 @@
-[Here README English version](README_EN.md)
+[Here README English version](README_EN.md)             
+
 # Qanlex - Desarrollo de sistema de scraper web
 
-**La tarea es desarrollar un scraper web para una página suministrada por la empresa con el objetivo es extraer información relevante sobre demandas presentes en el sitio..**
+**La tarea es desarrollar un scraper web para una página suministrada por la empresa con el objetivo es extraer información relevante sobre demandas presentes en el sitio.**
 
 ## Índice
 
@@ -75,6 +76,8 @@
     * Anti-Captcha: Otro servicio popular, con una API fácil de usar y soporte para múltiples lenguajes de programación.
     * DeathByCaptcha: Similar a 2Captcha, ofrece resolución de CAPTCHA a través de una API.
     * CapMonster: Ofrece una variedad de soluciones para la resolución de CAPTCHA, incluyendo servicios en la nube y software local.
+
+* Se ha realizado una aproximación al despliegue en los servicios de AWS por favor lea el [README AWS haciendo click aquí](aws/README.md) el cual se ve afectado por la limitación de la resolución del reCAPTCHA.
 
 ## Instalación
 
